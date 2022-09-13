@@ -40,6 +40,11 @@
 #define PROMPT_ON	COLOR_BLUE "[bluetooth]" COLOR_OFF "# "
 #define PROMPT_OFF	"Waiting to connect to bluetoothd..."
 
+// time measurement
+long dis_start, dis_stop;
+long con_start, con_stop;
+struct timeval timecheck;
+
 static DBusConnection *dbus_conn;
 
 static GDBusProxy *agent_manager;
@@ -256,6 +261,25 @@ static void print_iter(const char *label, const char *name,
 		break;
 	case DBUS_TYPE_BOOLEAN:
 		dbus_message_iter_get_basic(iter, &valbool);
+
+		// End of connect measurement
+		int true_check = valbool == TRUE ? 1 : 0;
+		
+		if (strcmp(name, "ServicesResolved") == 0 && true_check == 1){
+			
+			gettimeofday(&timecheck, NULL);
+			con_stop = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
+			//Write time taken to file
+			FILE * con_file = fopen("/home/ubuntu/Desktop/connect.txt", "a");
+			if (con_file != NULL)            
+			{
+				fprintf(con_file, "%ld\n", (con_stop - con_start));  
+			}
+			fclose(con_file);
+			con_file = NULL;
+		}
+
 		bt_shell_printf("%s%s: %s\n", label, name,
 					valbool == TRUE ? "yes" : "no");
 		break;
@@ -2043,7 +2067,11 @@ static void connect_reply(DBusMessage *message, void *user_data)
 }
 
 static void cmd_connect(int argc, char *argv[])
-{
+{	
+	// Start time measurement
+	gettimeofday(&timecheck, NULL);
+	con_start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 	GDBusProxy *proxy;
 
 	if (check_default_ctrl() == FALSE)
