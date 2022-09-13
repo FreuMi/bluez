@@ -2105,6 +2105,20 @@ static void disconn_reply(DBusMessage *message, void *user_data)
 		return bt_shell_noninteractive_quit(EXIT_FAILURE);
 	}
 
+	// Stop disconnect time measurement
+	gettimeofday(&timecheck, NULL);
+	dis_stop = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
+	//Write to file
+	FILE * discon_file = fopen("/home/ubuntu/Desktop/disconnect.txt", "a");
+	if (discon_file != NULL)            
+ 	{
+    	fprintf(discon_file, "%ld\n", (dis_stop - dis_start));  
+
+	}
+	fclose(discon_file);
+	discon_file = NULL;
+
 	bt_shell_printf("Successful disconnected\n");
 
 	if (proxy == default_dev)
@@ -2115,6 +2129,10 @@ static void disconn_reply(DBusMessage *message, void *user_data)
 
 static void cmd_disconn(int argc, char *argv[])
 {
+	// Start disconnect time measurement
+	gettimeofday(&timecheck, NULL);
+	dis_start = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 	GDBusProxy *proxy;
 
 	proxy = find_device(argc, argv);
