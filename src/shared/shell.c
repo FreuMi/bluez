@@ -46,6 +46,11 @@
 		printf(COLOR_BLUE "%s %-*s " COLOR_OFF "%s\n", \
 			cmd, (int)(CMD_LENGTH - strlen(cmd)), "", desc)
 
+// time measurement
+long read_stop;
+struct timeval timecheck2;
+long start_read_glob = 0;
+
 struct bt_shell_env {
 	char *name;
 	void *value;
@@ -578,6 +583,19 @@ void bt_shell_printf(const char *fmt, ...)
 
 static void print_string(const char *str, void *user_data)
 {
+	// Stop read time measurement
+	gettimeofday(&timecheck2, NULL);
+	read_stop = (long)timecheck2.tv_sec * 1000 + (long)timecheck2.tv_usec / 1000;
+	//Write to file
+	FILE * discon_file = fopen("/home/ubuntu/Desktop/read_stop.txt", "a");
+	if (discon_file != NULL)            
+ 	{
+    	fprintf(discon_file, "%ld\n", (read_stop - start_read_glob));  
+
+	}
+	fclose(discon_file);
+	discon_file = NULL;
+	
 	bt_shell_printf("%s\n", str);
 }
 

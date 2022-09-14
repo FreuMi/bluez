@@ -20,6 +20,7 @@
 #define COLOR_HIGHLIGHT	"\001\x1B[1;39m\002"
 
 struct bt_shell_menu;
+extern long start_read_glob;
 
 typedef void (*bt_shell_menu_cb_t)(int argc, char *argv[]);
 typedef char * (*bt_shell_menu_gen_t)(const char *text, int state);
