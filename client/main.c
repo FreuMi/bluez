@@ -2279,7 +2279,12 @@ static void cmd_attribute_info(int argc, char *argv[])
 }
 
 static void cmd_read(int argc, char *argv[])
-{
+{	
+	// Start of read measurement
+	
+	gettimeofday(&timecheck, NULL);
+	start_read_glob = (long)timecheck.tv_sec * 1000 + (long)timecheck.tv_usec / 1000;
+
 	if (!default_attr) {
 		bt_shell_printf("No attribute selected\n");
 		return bt_shell_noninteractive_quit(EXIT_FAILURE);
